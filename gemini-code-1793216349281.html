@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Calidad & Acreditación — Clínica Cruz Nacional</title>
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --ccn-blue: #0073CF;
+            --ccn-navy: #16284A;
+            --ccn-red: #E31B23;
+            --ccn-bg: #EBF1F6;
+        }
+        body {
+            background-color: var(--ccn-bg);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+        /* Header 60px */
+        .navbar-cn {
+            background-color: var(--ccn-navy);
+            height: 60px;
+            border-bottom: 3px solid var(--ccn-red);
+        }
+        .card-cn {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            background: #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-cn-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .btn-module {
+            background-color: #ffffff;
+            border: 1px solid #CBD5E1;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #1E293B;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .btn-module:hover {
+            background-color: #F1F5F9;
+            border-color: var(--ccn-blue);
+            color: var(--ccn-blue);
+        }
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        /* Velocímetros Visuales SVG */
+        .gauge-card {
+            text-align: center;
+            padding: 18px 12px;
+        }
+        .gauge-val {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-top: -10px;
+        }
+        /* Tabs de Gestión de Calidad */
+        .nav-tabs-ccn .nav-link {
+            color: var(--ccn-navy);
+            font-weight: 600;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 10px 20px;
+        }
+        .nav-tabs-ccn .nav-link.active {
+            color: var(--ccn-blue);
+            border-bottom-color: var(--ccn-blue);
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR COMPACTA (60px) -->
+    <nav class="navbar navbar-expand-lg navbar-cn fixed-top px-4">
+        <div class="container-fluid p-0">
+            <!-- Brand -->
+            <a class="navbar-brand text-white fw-bold d-flex align-items-center me-4" href="#" onclick="showSection('dashboard')">
+                <!-- Cruz Oficial -->
+                <svg width="28" height="28" viewBox="0 0 100 100" class="me-2">
+                    <path d="M35,0 L65,0 L65,35 L100,35 L100,65 L65,65 L65,100 L35,100 L35,65 L0,65 L0,35 L35,35 Z" fill="#0073CF"/>
+                    <path d="M35,35 L65,35 L65,65 L35,65 Z" fill="#16284A"/>
+                    <path d="M65,35 L100,35 L100,65 L65,65 Z" fill="#E31B23"/>
+                    <path d="M35,65 L65,65 L65,100 L35,100 Z" fill="#E31B23"/>
+                </svg>
+                <span>CLÍNICA CRUZ NACIONAL <small class="fw-normal text-white-50 fs-6">| Calidad & Acreditación</small></span>
+            </a>
+
+            <!-- SELECTOR DE SUCURSAL DINOAMICO -->
+            <div class="d-none d-md-flex align-items-center me-auto">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-secondary border-secondary text-white"><i class="bi bi-geo-alt-fill"></i></span>
+                    <select class="form-select form-select-sm bg-dark text-white border-secondary fw-semibold" id="selectSucursal" onchange="cambiarSucursal(this.value)">
+                        <option value="todas">-- Vista Red Consolidada (Clínica y Calidad) --</option>
+                        <option value="independencia" selected>Cruz Nacional Independencia</option>
+                        <option value="puente_alto">Cruz Nacional Puente Alto</option>
+                        <option value="santiago_centro">Cruz Nacional Santiago Centro</option>
+                        <option value="maipu">Cruz Nacional Maipú</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- CREDENCIAL DE ACCESO Y PERFIL (FHIR Practitioner) -->
+            <div class="d-flex align-items-center ms-auto">
+                <button class="btn btn-outline-light btn-sm me-3 d-flex align-items-center border-0" data-bs-toggle="modal" data-bs-target="#modalCredencial">
+                    <i class="bi bi-person-badge-fill me-2 fs-5 text-warning"></i>
+                    <div class="text-start d-none d-lg-block">
+                        <div class="fw-semibold small leading-none">Paulette Courdurier G.</div>
+                        <div class="text-white-50" style="font-size: 0.7rem;">Área Clínica y Calidad</div>
+                    </div>
+                </button>
+                <a href="#" class="btn btn-sm btn-outline-danger" title="Cerrar Sesión"><i class="bi bi-power"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENEDOR PRINCIPAL DINOAMICO -->
+    <main class="container-fluid px-4 pt-5 mt-4">
+
+        <!-- ========================================================= -->
+        <!-- SECCIÓN 0: DASHBOARD PRINCIPAL / VISTA GERENCIAL          -->
+        <!-- ========================================================= -->
+        <div id="sec-dashboard" class="app-section">
+            <div class="d-flex justify-content-between align-items-center my-3">
+                <div>
+                    <h4 class="fw-bold text-dark mb-0" id="tituloSucursal">Cruz Nacional Independencia</h4>
+                    <p class="text-muted small mb-0">Consola de Control de Calidad, Indicadores y Cumplimientos Normativos.</p>
+                </div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                    <i class="bi bi-shield-check me-1"></i> Servidor HL7 FHIR Auditado (Ley N° 20.584 / N° 19.628)
+                </span>
+            </div>
+
+            <!-- LOS 4 VELOCÍMETROS GERENCIALES -->
+            <div class="row g-3 mb-4">
+                <!-- Velocímetro 1: Total -->
+                <div class="col-md-3">
+                    <div class="card card-cn gauge-card card-cn-hover">
+                        <span class="text-muted small fw-bold text-uppercase">Informe Total</span>
+                        <svg width="140" height="85" viewBox="0 0 100 60">
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M 10 50 A 40 40 0 0 1 78 22" fill="none" stroke="#0073CF" stroke-width="12" stroke-linecap="round"/>
+                        </svg>
+                        <div class="gauge-val text-primary">70.8%</div>
+                        <small class="text-muted">34 / 48 Indicadores Cumplidos</small>
+                    </div>
+                </div>
+
+                <!-- Velocímetro 2: Obligatorios -->
+                <div class="col-md-3">
+                    <div class="card card-cn gauge-card card-cn-hover border-start border-danger border-4">
+                        <span class="text-muted small fw-bold text-uppercase">Indicadores Obligatorios</span>
+                        <svg width="140" height="85" viewBox="0 0 100 60">
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M 10 50 A 40 40 0 0 1 68 28" fill="none" stroke="#E31B23" stroke-width="12" stroke-linecap="round"/>
+                        </svg>
+                        <div class="gauge-val text-danger">66.7%</div>
+                        <small class="text-danger fw-semibold">8 / 12 Cumplidos (Brecha Crítica)</small>
+                    </div>
+                </div>
+
+                <!-- Velocímetro 3: Calidad & Seguridad -->
+                <div class="col-md-3">
+                    <div class="card card-cn gauge-card card-cn-hover">
+                        <span class="text-muted small fw-bold text-uppercase">Calidad & Seguridad Asistencial</span>
+                        <svg width="140" height="85" viewBox="0 0 100 60">
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M 10 50 A 40 40 0 0 1 82 18" fill="none" stroke="#10B981" stroke-width="12" stroke-linecap="round"/>
+                        </svg>
+                        <div class="gauge-val text-success">74.3%</div>
+                        <small class="text-muted">26 / 35 Cumplidos</small>
+                    </div>
+                </div>
+
+                <!-- Velocímetro 4: Gerencial -->
+                <div class="col-md-3">
+                    <div class="card card-cn gauge-card card-cn-hover">
+                        <span class="text-muted small fw-bold text-uppercase">Indicadores de Gerencia</span>
+                        <svg width="140" height="85" viewBox="0 0 100 60">
+                            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#E2E8F0" stroke-width="12" stroke-linecap="round"/>
+                            <path d="M 10 50 A 40 40 0 0 1 62 32" fill="none" stroke="#F59E0B" stroke-width="12" stroke-linecap="round"/>
+                        </svg>
+                        <div class="gauge-val text-warning">63.6%</div>
+                        <small class="text-muted">21 / 33 Cumplidos</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOS 6 MÓDULOS DE LA PLATAFORMA -->
+            <h6 class="fw-bold text-secondary mb-3 text-uppercase fs-7"><i class="bi bi-grid-fill me-1"></i> Módulos de Trabajo por Sucursal</h6>
+            <div class="row g-3 mb-4">
+                <!-- Módulo 1 -->
+                <div class="col-md-4">
+                    <a href="#" class="btn-module shadow-sm" onclick="showSection('acreditacion')">
+                        <div class="icon-box bg-primary-subtle text-primary"><i class="bi bi-award-fill"></i></div>
+                        <div>
+                            <div>1. Acreditación de Prestadores</div>
+                            <small class="text-muted fw-normal">Pauta cotejo, Ámbitos & Monitoreo</small>
+                        </div>
+                    </a>
+                </div>
+                <!-- Módulo 2 -->
+                <div class="col-md-4">
+                    <a href="#" class="btn-module shadow-sm" onclick="showSection('seremi')">
+                        <div class="icon-box bg-danger-subtle text-danger"><i class="bi bi-building-check"></i></div>
+                        <div>
+                            <div>2. Visita SEREMI</div>
+                            <small class="text-muted fw-normal">Resoluciones, Carpetas & Actas</small>
+                        </div>
+                    </a>
+                </div>
+                <!-- Módulo 3 -->
+                <div class="col-md-4">
+                    <a href="#" class="btn-module shadow-sm" onclick="showSection('gestion_calidad')">
+                        <div class="icon-box bg-success-subtle text-success"><i class="bi bi-clipboard-data-fill"></i></div>
+                        <div>
+                            <div>3. Gestión de Calidad (GCL)</div>
+                            <small class="text-muted fw-normal">Pautas 129 ítems, Dashboard & Visitas</small>
+                        </div>
+                    </a>
+                </div>
+                <!-- Módulo 4 -->
+                <div class="col-md-4">
+                    <a href="#" class="btn-module shadow-sm" onclick="showSection('documental')">
+                        <div class="icon-box bg-info-subtle text-info"><i class="bi bi-folder-symlink-fill"></i></div>
+                        <div>
+                            <div>4. Gestión Documental</div>
+                            <small class="text-muted fw-normal">Protocolos, Anexos & Formularios</small>
+                        </div>
+                    </a>
+                </div>
+                <!-- Módulo 5 -->
+                <div class="col-md-4">
+                    <a href="#" class="btn-module shadow-sm" onclick="showSection('paciente')">
+                        <div class="icon-box bg-warning-subtle text-warning"><i class="bi bi-headset"></i></div>
+                        <div>
+                            <div>5. Atención al Paciente</div>
+                            <small class="text-muted fw-normal">Tickets Reclamos e Incidencias</small>
+                        </div>
+                    </a>
+                </div>
+                <!-- Módulo 6 -->
+                <div class="col-md-4">
+                    <a href="#" class="btn-module shadow-sm" onclick="showSection('contraloria')">
+                        <div class="icon-box bg-dark-subtle text-dark"><i class="bi bi-calculator-fill"></i></div>
+                        <div>
+                            <div>6. Contraloría & Muestreo</div>
+                            <small class="text-muted fw-normal">Muestreo (18), Críticos & Rechazos</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- TAREAS Y BRECHAS DEL MES -->
+            <div class="card card-cn p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-exclamation-octagon-fill text-danger me-2"></i>Tareas y Brechas Críticas Pendientes</h6>
+                    <span class="badge bg-danger">2 Alertas Prioritarias</span>
+                </div>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold text-danger">REG-1.2 — Cumplimiento del registro de ficha clínica</div>
+                            <div class="small text-muted">Estado actual: <strong>44,4%</strong> | Umbral normativo exigido: <strong>≥95%</strong></div>
+                        </div>
+                        <button class="btn btn-sm btn-primary px-3" onclick="showSection('contraloria')">Auditar Fichas (18)</button>
+                    </div>
+                    <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold text-warning">AOC-1.2 — Cumplimiento de notificación de resultados críticos de laboratorio</div>
+                            <div class="small text-muted">Estado actual: <strong>55,6%</strong> | Umbral normativo exigido: <strong>≥80%</strong></div>
+                        </div>
+                        <button class="btn btn-sm btn-primary px-3" onclick="showSection('contraloria')">Verificar SAM</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- MÓDULO 1: ACREDITACIÓN DE PRESTADORES                      -->
+        <!-- ========================================================= -->
+        <div id="sec-acreditacion" class="app-section d-none">
+            <button class="btn btn-outline-secondary btn-sm mb-3" onclick="showSection('dashboard')"><i class="bi bi-arrow-left"></i> Volver al Dashboard</button>
+            <h4 class="fw-bold text-primary mb-3"><i class="bi bi-award-fill me-2"></i>Acreditación de Prestadores — Estándar General</h4>
+            
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card card-cn p-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-2">Pauta de Cotejo (Ámbitos)</h6>
+                        <div class="list-group list-group-flush small">
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Dignidad del Paciente (DP)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Gestión de la Calidad (CAL)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Gestión Clínica (GCL)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Acceso y Oportunidad (AOC)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Recurso Humano (RH)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Registros (REG)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Equipamiento (EQ)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-primary">➔ Instalaciones (INS)</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-cn p-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-2">Gestión de Indicadores</h6>
+                        <div class="list-group list-group-flush small">
+                            <a href="#" class="list-group-item list-group-item-action text-secondary">➔ Crear / Modificar Indicadores</a>
+                            <a href="#" class="list-group-item list-group-item-action text-secondary">➔ Ingreso de Datos Mensuales</a>
+                            <a href="#" class="list-group-item list-group-item-action text-secondary">➔ Indicadores por Servicio</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-cn p-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-2">Monitoreo & Características</h6>
+                        <div class="list-group list-group-flush small">
+                            <a href="#" class="list-group-item list-group-item-action text-danger fw-bold">➔ Características Obligatorias (100%)</a>
+                            <a href="#" class="list-group-item list-group-item-action text-secondary">➔ Características por Servicio</a>
+                            <a href="#" class="list-group-item list-group-item-action text-secondary">➔ Consolidado Global Red</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- MÓDULO 2: VISITA SEREMI                                   -->
+        <!-- ========================================================= -->
+        <div id="sec-seremi" class="app-section d-none">
+            <button class="btn btn-outline-secondary btn-sm mb-3" onclick="showSection('dashboard')"><i class="bi bi-arrow-left"></i> Volver al Dashboard</button>
+            <h4 class="fw-bold text-danger mb-3"><i class="bi bi-building-check me-2"></i>Carpeta de Fiscalización Visita SEREMI</h4>
+            
+            <div class="card card-cn p-4">
+                <h6 class="fw-bold text-dark mb-3">Documentación Obligatoria Cargada por Sucursal</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Documento / Resolución</th>
+                                <th>Fecha Emisión</th>
+                                <th>Estado Vigencia</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Resolución Sanitaria Sala de Procedimientos Urgencia</td>
+                                <td>15/03/2024</td>
+                                <td><span class="badge bg-success">Vigente</span></td>
+                                <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Ver PDF</button></td>
+                            </tr>
+                            <tr>
+                                <td>Resolución Operador de Rayos X (TENS/Tecnólogo)</td>
+                                <td>10/11/2025</td>
+                                <td><span class="badge bg-success">Vigente</span></td>
+                                <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Ver PDF</button></td>
+                            </tr>
+                            <tr>
+                                <td>Plan de Gestión REAS (DS N° 6)</td>
+                                <td>01/01/2026</td>
+                                <td><span class="badge bg-warning text-dark">Por Renovar</span></td>
+                                <td><button class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i> Ver PDF</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- MÓDULO 3: GESTIÓN DE CALIDAD (GCL, AUTOGESTIÓN, DASHBOARD) -->
+        <!-- ========================================================= -->
+        <div id="sec-gestion_calidad" class="app-section d-none">
+            <button class="btn btn-outline-secondary btn-sm mb-3" onclick="showSection('dashboard')"><i class="bi bi-arrow-left"></i> Volver al Dashboard</button>
+            <h4 class="fw-bold text-success mb-3"><i class="bi bi-clipboard-data-fill me-2"></i>Módulo de Gestión de Calidad (GCL)</h4>
+
+            <!-- TABS INTERNAS -->
+            <ul class="nav nav-tabs nav-tabs-ccn mb-4" id="gclTabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-autogestion">1. Autogestión Gerente (129 Ítems)</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-dashboard">2. Dashboard Interno Calidad</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-visitas">3. Visitas en Terreno & Planes de Acción</button></li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Tab 1: Autogestión 129 -->
+                <div class="tab-pane fade show active" id="tab-autogestion">
+                    <div class="card card-cn p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold text-primary mb-0">Pauta de Autogestión de Calidad (129 Ítems)</h6>
+                            <a href="https://calidad-ccn.github.io/autogestion_calidad/" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-up-right me-1"></i> Abrir Versión Actual GitHub</a>
+                        </div>
+                        <p class="text-muted small">Cuestionario con lógica condicional de "En Gestión" (Área, Mes/Año, Medio), Contraloría de Bodega 3+3 y preguntas al equipo.</p>
+                        <button class="btn btn-success btn-sm w-auto align-self-start"><i class="bi bi-plus-lg me-1"></i> Iniciar Nueva Pauta Semanal</button>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Dashboard Interno 1 -->
+                <div class="tab-pane fade" id="tab-dashboard">
+                    <div class="card card-cn p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold text-primary mb-0">Dashboard de Supervisión Interna de la Red</h6>
+                            <a href="https://calidad-ccn.github.io/dashboard-calidad-interno1/" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-up-right me-1"></i> Abrir Versión Actual GitHub</a>
+                        </div>
+                        <p class="text-muted small">Consola global del Área Clínica y Calidad para consolidar métricas, ingresar resultados de visitas y monitorear tendencias multi-sucursal.</p>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Visitas de Calidad -->
+                <div class="tab-pane fade" id="tab-visitas">
+                    <div class="card card-cn p-4">
+                        <h6 class="fw-bold text-primary mb-3">Historial de Visitas Mensuales en Terreno</h6>
+                        <p class="text-muted small">Descarga de informes PDF oficiales (con sus 4 velocímetros) y seguimiento de compromiso de Planes de Acción.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- MÓDULO 4: GESTIÓN DOCUMENTAL                              -->
+        <!-- ========================================================= -->
+        <div id="sec-documental" class="app-section d-none">
+            <button class="btn btn-outline-secondary btn-sm mb-3" onclick="showSection('dashboard')"><i class="bi bi-arrow-left"></i> Volver al Dashboard</button>
+            <h4 class="fw-bold text-info mb-3"><i class="bi bi-folder-symlink-fill me-2"></i>Gestión Documental Institucional</h4>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card card-cn p-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-2">Clasificación por Ámbitos de Acreditación</h6>
+                        <div class="list-group list-group-flush small">
+                            <a href="#" class="list-group-item list-group-item-action">📁 Protocolos GCL (Gestión Clínica)</a>
+                            <a href="#" class="list-group-item list-group-item-action">📁 Protocolos REG (Ficha Clínica)</a>
+                            <a href="#" class="list-group-item list-group-item-action">📁 Protocolos IAAS / EPP</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card card-cn p-3">
+                        <h6 class="fw-bold text-dark border-bottom pb-2">Clasificación por Área Operativa</h6>
+                        <div class="list-group list-group-flush small">
+                            <a href="#" class="list-group-item list-group-item-action">📁 Urgencia & Box de Procedimientos</a>
+                            <a href="#" class="list-group-item list-group-item-action">📁 Rayos X e Imagenología</a>
+                            <a href="#" class="list-group-item list-group-item-action">📁 Toma de Muestras & Bodega</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- MÓDULO 5: ATENCIÓN AL PACIENTES (RECLAMOS E INCIDENCIAS)   -->
+        <!-- ========================================================= -->
+        <div id="sec-paciente" class="app-section d-none">
+            <button class="btn btn-outline-secondary btn-sm mb-3" onclick="showSection('dashboard')"><i class="bi bi-arrow-left"></i> Volver al Dashboard</button>
+            <h4 class="fw-bold text-warning mb-3"><i class="bi bi-headset me-2"></i>Atención al Paciente & Sistema de Tickets de Reclamos</h4>
+            
+            <div class="card card-cn p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0">Gestión de Tickets de la Sucursal (Ley N° 20.584)</h6>
+                    <button class="btn btn-warning btn-sm fw-bold"><i class="bi bi-plus-circle me-1"></i> Registrar Nuevo Reclamo / Incidencia</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Ticket #</th>
+                                <th>Paciente (RUT)</th>
+                                <th>Fecha Ingreso</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Plazo Respuesta</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#REC-2026-042</td>
+                                <td>17.902.934-0</td>
+                                <td>14/09/2026</td>
+                                <td><span class="badge bg-secondary">Reclamo</span></td>
+                                <td><span class="badge bg-success">Respondido en Plazo</span></td>
+                                <td>15 días hábiles</td>
+                                <td><button class="btn btn-sm btn-outline-primary">Editar / Carta</button></td>
+                            </tr>
+                            <tr>
+                                <td>#REC-2026-089</td>
+                                <td>11.209.360-5</td>
+                                <td>20/10/2026</td>
+                                <td><span class="badge bg-danger">Incidencia</span></td>
+                                <td><span class="badge bg-warning text-dark">En Investigación</span></td>
+                                <td>Quedan 4 días</td>
+                                <td><button class="btn btn-sm btn-outline-primary">Editar / Carta</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- MÓDULO 6: CONTRALORÍA, MUESTREO Y RESULTADOS CRÍTICOS     -->
+        <!-- ========================================================= -->
+        <div id="sec-contraloria" class="app-section d-none">
+            <button class="btn btn-outline-secondary btn-sm mb-3" onclick="showSection('dashboard')"><i class="bi bi-arrow-left"></i> Volver al Dashboard</button>
+            <h4 class="fw-bold text-dark mb-3"><i class="bi bi-calculator-fill me-2"></i>Módulo de Contraloría, Muestreo y Auditoría</h4>
+
+            <div class="row g-3 mb-4">
+                <!-- Paso 1: Carga de Archivos -->
+                <div class="col-md-6">
+                    <div class="card card-cn p-4 h-100">
+                        <h6 class="fw-bold text-primary mb-3">1. Contraloría de Fichas Clínicas (Muestreo Automático $n=18$)</h6>
+                        <p class="text-muted small">Sube el archivo <code>Reporte Pacientes en Alta.xlsx/csv</code>. El sistema filtrará automáticamente Urgencias vs. Exámenes, calculará el tamaño muestral y aleatorizará las 18 fichas.</p>
+                        
+                        <div class="mb-3">
+                            <input class="form-control form-control-sm" type="file" id="fileAltas">
+                        </div>
+                        <button class="btn btn-primary btn-sm align-self-start" onclick="simularMuestreo()"><i class="bi bi-cpu me-1"></i> Filtrar & Aleatorizar Muestra</button>
+                    </div>
+                </div>
+
+                <!-- Paso 2: Resultados Críticos -->
+                <div class="col-md-6">
+                    <div class="card card-cn p-4 h-100">
+                        <h6 class="fw-bold text-primary mb-3">2. Resultados Críticos e Imagenología (Multisucursal)</h6>
+                        <p class="text-muted small">Sube los reportes de prestadores (Rayos X, ECO, TAAG/Positivos). La plataforma enrutará y filtrará automáticamente los datos pertenecientes a cada sucursal.</p>
+                        
+                        <div class="mb-3">
+                            <input class="form-control form-control-sm" type="file" id="fileCriticos">
+                        </div>
+                        <button class="btn btn-dark btn-sm align-self-start"><i class="bi bi-funnel-fill me-1"></i> Cargar y Separar por Sucursal</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESULTADO DEL MUESTREO (PANEL DE TRABAJO 1 A 1) -->
+            <div id="panelAuditoria" class="card card-cn p-4 mb-4 d-none">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                    <div>
+                        <span class="badge bg-primary me-2">Ficha Muestral 1 de 18</span>
+                        <strong class="fs-6 text-dark">N° SAM: 849201 | RUT: 12.345.678-K</strong>
+                        <span class="text-muted small ms-2">(Modo Auditoría Activa)</span>
+                    </div>
+                    <button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#modalCertificado"><i class="bi bi-shield-check text-success me-1"></i> Ver Certificado Auditable SEREMI</button>
+                </div>
+
+                <div class="row g-3 small">
+                    <div class="col-12 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                        <span>1. Anamnesis y motivo de consulta registrado correctamente en SAM</span>
+                        <div class="btn-group btn-group-sm">
+                            <input type="radio" class="btn-check" name="f1_1" id="f1_1_c" checked><label class="btn btn-outline-success px-3" for="f1_1_c">Cumple</label>
+                            <input type="radio" class="btn-check" name="f1_1" id="f1_1_nc"><label class="btn btn-outline-danger px-3" for="f1_1_nc">No Cumple</label>
+                        </div>
+                    </div>
+                    <div class="col-12 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                        <span>2. Control de Signos Vitales (CSV) registrado al ingreso</span>
+                        <div class="btn-group btn-group-sm">
+                            <input type="radio" class="btn-check" name="f1_2" id="f1_2_c" checked><label class="btn btn-outline-success px-3" for="f1_2_c">Cumple</label>
+                            <input type="radio" class="btn-check" name="f1_2" id="f1_2_nc"><label class="btn btn-outline-danger px-3" for="f1_2_nc">No Cumple</label>
+                        </div>
+                    </div>
+                    <div class="col-12 border-bottom pb-2 d-flex justify-content-between align-items-center">
+                        <span>3. Evolución médica e indicaciones de alta claras</span>
+                        <div class="btn-group btn-group-sm">
+                            <input type="radio" class="btn-check" name="f1_3" id="f1_3_c"><label class="btn btn-outline-success px-3" for="f1_3_c">Cumple</label>
+                            <input type="radio" class="btn-check" name="f1_3" id="f1_3_nc" checked><label class="btn btn-outline-danger px-3" for="f1_3_nc">No Cumple</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <button class="btn btn-outline-secondary btn-sm" disabled><i class="bi bi-chevron-left"></i> Anterior</button>
+                    <button class="btn btn-primary btn-sm px-4">Siguiente Ficha (2/18) <i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL CREDENCIAL DIGITAL (FHIR Practitioner) -->
+    <div class="modal fade" id="modalCredencial" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fs-6"><i class="bi bi-person-badge text-warning me-2"></i>Credencial Digital de Acceso (FHIR)</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <i class="bi bi-person-circle text-primary display-1 mb-2"></i>
+                    <h5 class="fw-bold mb-1">Paulette Elisa Courdurier Garcia</h5>
+                    <p class="text-muted small mb-3">RUT: 19.517.078-9 | Registro SIS: 482910</p>
+                    
+                    <div class="bg-light p-3 rounded text-start small border mb-3">
+                        <div class="row mb-1"><div class="col-5 text-muted">Cargo:</div><div class="col-7 fw-semibold">Profesional de Calidad</div></div>
+                        <div class="row mb-1"><div class="col-5 text-muted">Área:</div><div class="col-7 fw-semibold">Área Clínica y Calidad</div></div>
+                        <div class="row mb-1"><div class="col-5 text-muted">Sucursal Base:</div><div class="col-7 fw-semibold">Cruz Nacional Independencia</div></div>
+                        <div class="row"><div class="col-5 text-muted">Acceso:</div><div class="col-7 fw-semibold text-success">Global / Multi-Sucursal</div></div>
+                    </div>
+
+                    <div class="p-2 bg-dark-subtle rounded font-monospace small text-muted">
+                        FHIR Resource ID: Practitioner/195170789
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CERTIFICADO AUDITABLE SEREMI -->
+    <div class="modal fade" id="modalCertificado" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fs-6"><i class="bi bi-file-earmark-check text-warning me-2"></i>Certificado Auditable de Tamaño Muestral y Aleatorización</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border small mb-3">
+                        <strong>Origen del Archivo:</strong> <code>Reporte Pacientes en Alta - IND.xlsx</code><br>
+                        <strong>Fecha / Sello de Tiempo:</strong> 28/10/2026 - 16:30:12 UTC
+                    </div>
+
+                    <h6 class="fw-bold text-primary mb-2">1. Parámetros del Cálculo Estadístico</h6>
+                    <table class="table table-sm table-bordered small text-center mb-3">
+                        <tbody>
+                            <tr><th>Universo Total ($N$):</th><td>482 Altas</td><th>Universo Filtrado Urgencias:</th><td>312 Pacientes</td></tr>
+                            <tr><th>Nivel de Confianza ($Z$):</th><td>95% ($Z = 1.96$)</td><th>Margen de Error ($e$):</th><td>5%</td></tr>
+                            <tr><th>Desviación ($p$):</th><td>50%</td><th>Tamaño Muestra ($n$):</th><td class="fw-bold text-success">18 Fichas</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h6 class="fw-bold text-primary mb-2">2. Trazabilidad Criptográfica de Aleatorización</h6>
+                    <div class="p-2 bg-light border rounded font-monospace small mb-3">
+                        <strong>Random Seed (Semilla):</strong> 8f92a40b1e7c992d<br>
+                        <strong>Fichas Seleccionadas (ID):</strong> [12, 45, 89, 102, 118, 134, 150, 162, 189, 201, 222, 245, 260, 271, 285, 290, 301, 310]<br>
+                        <strong>Hash de Registro (SHA-256):</strong> e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                    </div>
+
+                    <div class="text-end">
+                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-file-pdf-fill me-1"></i> Descargar Respaldos para SEREMI (PDF)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- LÓGICA DE NAVEGACIÓN Y SIMULACIÓN EN JS -->
+    <script>
+        // Navegación entre Módulos
+        function showSection(sectionId) {
+            document.querySelectorAll('.app-section').forEach(el => el.classList.add('d-none'));
+            document.getElementById('sec-' + sectionId).classList.remove('d-none');
+            window.scrollTo(0, 0);
+        }
+
+        // Selector de Sucursales
+        function cambiarSucursal(valor) {
+            const titulo = document.getElementById('tituloSucursal');
+            if (valor === 'todas') {
+                titulo.innerHTML = 'Consolidado Red Cruz Nacional (Todas las Sucursales)';
+            } else if (valor === 'puente_alto') {
+                titulo.innerHTML = 'Cruz Nacional Puente Alto';
+            } else if (valor === 'santiago_centro') {
+                titulo.innerHTML = 'Cruz Nacional Santiago Centro';
+            } else if (valor === 'maipu') {
+                titulo.innerHTML = 'Cruz Nacional Maipú';
+            } else {
+                titulo.innerHTML = 'Cruz Nacional Independencia';
+            }
+        }
+
+        // Simulación Muestreo en Contraloría
+        function simularMuestreo() {
+            document.getElementById('panelAuditoria').classList.remove('d-none');
+            window.scrollTo(0, 600);
+        }
+    </script>
+</body>
+</html>
